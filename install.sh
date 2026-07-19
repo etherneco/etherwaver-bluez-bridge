@@ -67,4 +67,3 @@ else
     systemctl --no-pager --full status "$APP_NAME.service" || true
     die "service failed to start; inspect: journalctl -u $APP_NAME.service -n 100"
 fi
-

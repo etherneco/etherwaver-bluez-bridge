@@ -60,4 +60,3 @@ The EtherWaver event protocol currently has no authentication or encryption.
 The listener must only be exposed on a trusted LAN or restricted to the
 EtherWaver server with a firewall. The local diagnostic control listener binds
 to `127.0.0.1` by default.
-

@@ -25,4 +25,3 @@ if [ "${1:-}" = "--purge-config" ]; then
 else
     printf 'Removed application and service. Configuration kept at %s.\n' "$CONFIG_FILE"
 fi
-
