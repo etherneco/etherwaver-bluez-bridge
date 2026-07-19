@@ -1,0 +1,20 @@
+[Unit]
+Description=EtherWaver BlueZ Bluetooth HID bridge
+After=bluetooth.service network-online.target
+Wants=bluetooth.service network-online.target
+
+[Service]
+Type=simple
+User=etherwaver
+Group=etherwaver
+EnvironmentFile=/etc/etherwaver/etherwaver-bluez-bridge.env
+WorkingDirectory=/opt/etherwaver-bluez-bridge
+ExecStartPre=/usr/bin/bluetoothctl power on
+ExecStartPre=/usr/bin/bluetoothctl pairable on
+ExecStartPre=/usr/bin/bluetoothctl discoverable on
+ExecStart=/usr/bin/python3 -u /opt/etherwaver-bluez-bridge/src/etherwaver_bluez_bridge.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
