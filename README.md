@@ -7,6 +7,11 @@ The initial bridge implementation was developed and tested on a Raspberry Pi.
 It exposes a BLE HID keyboard and mouse through BlueZ and accepts EtherWaver
 input events over TCP.
 
+The project includes the bridge source, systemd service, environment
+configuration, installer, uninstaller, and system diagnostic script. See
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the internal design and
+runtime dependency rationale.
+
 ## Purpose
 
 The bridge runs on a Raspberry Pi and presents it to another computer as a
@@ -56,44 +61,52 @@ Each message ends with a newline. The default bridge address is
 
 ```text
 config/   Environment defaults for the service
+docs/     Architecture and operational documentation
+scripts/  Raspberry Pi diagnostics
 systemd/  systemd unit for Raspberry Pi deployment
 src/      BlueZ bridge implementation
+install.sh / uninstall.sh  Deployment scripts
 ```
 
 ## Installation
 
-Install the operating-system dependencies:
+Clone the repository on the Raspberry Pi and run the installer:
 
 ```bash
-sudo apt update
-sudo apt install bluez python3 python3-dbus python3-gi
+git clone https://github.com/etherneco/etherwaver-bluez-bridge.git
+cd etherwaver-bluez-bridge
+sudo ./install.sh
 ```
 
-The service expects the application in `/opt/etherwaver-bluez-bridge`, a
-dedicated `etherwaver` system user, and its configuration under
-`/etc/etherwaver`.
+The installer:
 
-```bash
-sudo useradd --system --home /opt/etherwaver-bluez-bridge \
-  --shell /usr/sbin/nologin etherwaver
-sudo install -d -o etherwaver -g etherwaver /opt/etherwaver-bluez-bridge
-sudo install -d -o etherwaver -g etherwaver /opt/etherwaver-bluez-bridge/src
-sudo install -m 0755 src/etherwaver_bluez_bridge.py \
-  /opt/etherwaver-bluez-bridge/src/etherwaver_bluez_bridge.py
-sudo install -d /etc/etherwaver
-sudo install -m 0644 config/etherwaver-bluez-bridge.env \
-  /etc/etherwaver/etherwaver-bluez-bridge.env
-sudo install -m 0644 systemd/etherwaver-bluez-bridge.service \
-  /etc/systemd/system/etherwaver-bluez-bridge.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now etherwaver-bluez-bridge.service
-```
+- installs BlueZ, Python, D-Bus bindings, and PyGObject from Raspberry Pi OS;
+- validates that the required Python libraries load;
+- installs the bridge under `/opt/etherwaver-bluez-bridge`;
+- creates the default configuration only when one does not already exist;
+- installs, enables, starts, and verifies the systemd service.
 
 Check startup and pairing activity with:
 
 ```bash
 sudo journalctl -u etherwaver-bluez-bridge.service -f
 ```
+
+Run a system check independently with:
+
+```bash
+./scripts/check-system.sh
+```
+
+To uninstall the service while preserving its configuration:
+
+```bash
+sudo ./uninstall.sh
+```
+
+Add `--purge-config` to remove `/etc/etherwaver/etherwaver-bluez-bridge.env`
+as well. System packages are intentionally left installed because they may be
+used by other Bluetooth applications.
 
 ## Configuration
 
