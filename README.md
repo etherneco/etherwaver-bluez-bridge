@@ -3,10 +3,9 @@
 Turn a Raspberry Pi into a Bluetooth keyboard and mouse bridge for
 [EtherWaver](https://github.com/etherneco/etherwaver) using BlueZ.
 
-> [!NOTE]
-> This repository is in early development. It currently contains the deployment
-> configuration extracted from EtherWaver. The BlueZ bridge implementation
-> (`src/etherwaver_bluez_bridge.py`) still needs to be added.
+The initial bridge implementation was developed and tested on a Raspberry Pi.
+It exposes a BLE HID keyboard and mouse through BlueZ and accepts EtherWaver
+input events over TCP.
 
 ## Purpose
 
@@ -50,6 +49,7 @@ Each message ends with a newline. The default bridge address is
 - Raspberry Pi with a Bluetooth adapter supporting peripheral mode
 - BlueZ and D-Bus
 - Python 3
+- Python D-Bus and GObject bindings (`python3-dbus`, `python3-gi`)
 - root access for installation and Bluetooth configuration
 
 ## Repository layout
@@ -57,10 +57,17 @@ Each message ends with a newline. The default bridge address is
 ```text
 config/   Environment defaults for the service
 systemd/  systemd unit for Raspberry Pi deployment
-src/      BlueZ bridge implementation (to be added)
+src/      BlueZ bridge implementation
 ```
 
-## Planned installation
+## Installation
+
+Install the operating-system dependencies:
+
+```bash
+sudo apt update
+sudo apt install bluez python3 python3-dbus python3-gi
+```
 
 The service expects the application in `/opt/etherwaver-bluez-bridge`, a
 dedicated `etherwaver` system user, and its configuration under
@@ -70,6 +77,9 @@ dedicated `etherwaver` system user, and its configuration under
 sudo useradd --system --home /opt/etherwaver-bluez-bridge \
   --shell /usr/sbin/nologin etherwaver
 sudo install -d -o etherwaver -g etherwaver /opt/etherwaver-bluez-bridge
+sudo install -d -o etherwaver -g etherwaver /opt/etherwaver-bluez-bridge/src
+sudo install -m 0755 src/etherwaver_bluez_bridge.py \
+  /opt/etherwaver-bluez-bridge/src/etherwaver_bluez_bridge.py
 sudo install -d /etc/etherwaver
 sudo install -m 0644 config/etherwaver-bluez-bridge.env \
   /etc/etherwaver/etherwaver-bluez-bridge.env
@@ -79,8 +89,11 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now etherwaver-bluez-bridge.service
 ```
 
-These commands become usable after the bridge implementation is added under
-`src/etherwaver_bluez_bridge.py`.
+Check startup and pairing activity with:
+
+```bash
+sudo journalctl -u etherwaver-bluez-bridge.service -f
+```
 
 ## Configuration
 
