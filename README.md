@@ -86,6 +86,12 @@ The installer:
 - creates the default configuration only when one does not already exist;
 - installs, enables, starts, and verifies the systemd service.
 
+`requirements.txt` is intentionally free of PyPI packages. The imported
+`dbus` and `gi` modules contain native bindings and are supplied by the
+`python3-dbus` and `python3-gi` Raspberry Pi OS packages installed by
+`install.sh`. Running `pip install -r requirements.txt` is therefore safe but
+does not replace the system-package installation.
+
 Check startup and pairing activity with:
 
 ```bash

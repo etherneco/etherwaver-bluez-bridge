@@ -1,0 +1,9 @@
+# No packages are installed from PyPI.
+#
+# The bridge imports `dbus` and `gi.repository.GLib`, but their Python modules
+# contain native bindings and must match the BlueZ/D-Bus/GLib libraries shipped
+# by Raspberry Pi OS. Install them with:
+#
+#   sudo apt install bluez python3 python3-dbus python3-gi
+#
+# `install.sh` installs and verifies all of these runtime dependencies.
